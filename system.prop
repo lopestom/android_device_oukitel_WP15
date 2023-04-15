@@ -1,0 +1,63 @@
+#from device
+ro.boot.hardware=MT6833
+ro.hardware=MT6833
+# ADDITIONAL_DEFAULT_PROPERTIES
+#
+ro.mediatek.version.branch=alps-mp-r0.mssi1
+ro.com.google.clientidbase=android-wheatek
+# identity
+Build.BRAND=MTK
+#
+# ODM_BUILD_PROPERTIES
+#
+ro.internal.version=TF919_OQ_S89_6833_R0_RUSSIA_V1.2.4_S220527
+ro.product.board=OUKITEL
+ro.cus.bt.name=WP15
+ro.tee_support=1
+ro.mtk_trustkernel_tee_support=1
+ro.mtk_tee_check_support=1
+ro.mtk_platform=MT6853
+ro.build.custom_int_version=TF919_OQ_S89_6833_R0_RUSSIA_V1.2.4_S220527
+ro.build.custom_version=OUKITEL_WP15_RU_V05_20220527
+ro.build.version.base_os=OUKITEL/WP15_RU/WP15:11/RP1A.200720.011/1640680713:user/release-keys
+#
+# ADDITIONAL VENDOR BUILD PROPERTIES
+#
+ro.sf.lcd_density=320
+ro.hardware.egl=meow
+ro.frp.pst=/dev/block/platform/bootdevice/by-name/frp
+persist.adb.nonblocking_ffs=0
+ro.vendor.mediatek.platform=MT6833
+ro.vendor.mtk_f2fs_enable=1
+ro.vendor.mtk_config_max_dram_size=0x800000000
+ro.vendor.mediatek.version.branch=alps-mp-r0.mp3
+ro.vendor.mediatek.version.release=alps-mp-r0.mp3-V2.273
+ro.vendor.mtk_emmc_support=1
+ro.vendor.mtk_ufs_support=1
+ro.vendor.mtk_trustkernel_tee_support=1
+ro.hardware.kmsetkey=trustkernel
+ro.hardware.gatekeeper=trustkernel
+init.userspace_reboot.is_supported=true
+# Crypt props
+ro.crypto.uses_fs_ioc_add_encryption_key=true
+ro.crypto.metadata.enabled=true
+ro.crypto.support_metadata_encrypt=true
+ro.crypto.volume.metadata.method=dm-default-key
+ro.crypto.dm_default_key.options_format.version=2
+ro.crypto.volume.options=::v2
+# Others functions
+ro.secure=0
+ro.adb.secure=0
+ro.debuggable=1
+ro.allow.mock.location=1
+persist.sys.usb.config=mtp,adb
+persist.service.adb.enable=1
+persist.service.debuggable=1
+persist.sys.isUsbOtgEnabled=true
+ro.sys.usb.mtp.whql.enable=0
+ro.sys.usb.storage.type=mtp
+ro.treble.enabled=true
+sys.usb.controller=musb-hdrc
+sys.usb.ffs.aio_compat=true
+#fbe.metadata.wrappedkey=true
+#vendor.gatekeeper.disable_spu=true
