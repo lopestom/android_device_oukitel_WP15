@@ -1,0 +1,100 @@
+import /vendor/etc/init/trustkernel.rc
+import /vendor/etc/init/android.hardware.gatekeeper@1.0-service.rc
+import /vendor/etc/init/android.hardware.keymaster@4.0-service.trustkernel.rc
+
+service keystore_auth /system/bin/keystore_auth
+    oneshot
+    user system
+    group root
+    seclabel u:r:recovery:s0
+
+on property:ro.crypto.type=file && property:ro.crypto.state=encrypted
+on property:vendor.trustkernel.ready=true
+    install_keyring
+    setprop crypto.ready 1
+
+on property:hwservicemanager.ready=true && property:crypto.ready=1
+    start vendor.keymaster-4-0-trustkernel
+    start vendor.gatekeeper-1-0
+
+on property:ro.crypto.state=unsupported
+    setprop crypto.ready 0
+    stop teed
+    stop tee_check_keybox
+    stop vendor.keymaster-4-0-trustkernel
+    stop vendor.gatekeeper-1-0
+
+on property:ro.crypto.state=unencrypted
+    setprop crypto.ready 0
+    stop teed
+    stop tee_check_keybox
+    stop vendor.keymaster-4-0-trustkernel
+    stop vendor.gatekeeper-1-0
+
+on property:twrp.decrypt.done=true && property:twrp.all.users.decrypted=true
+    setprop crypto.ready 0
+    stop teed
+    stop tee_check_keybox
+    stop vendor.keymaster-4-0-trustkernel
+    stop vendor.gatekeeper-1-0
+
+on boot
+     start boot-hal-1-2
+     start health-hal-2-1
+
+on init
+    setprop sys.usb.configfs 1
+    setprop sys.usb.ffs.aio_compat 1
+
+on fs && property:ro.debuggable=0
+    # distinguish USB shoulde connect or not, i.e. CDP vs SDP
+    write /sys/class/udc/musb-hdrc/device/cmode 2
+    # set charging free due to it wait for USB activation
+    start adbd2
+
+    mkdir /mnt/vendor 0755 system system
+    mkdir /mnt/vendor/apd 0771 system system
+    mkdir /mnt/vendor/protect_f 0770 system system
+    mkdir /mnt/vendor/protect_s 0770 system system
+    mkdir /mnt/vendor/persist 0755 system system
+    mkdir /mnt/vendor/nvdata 0771 system system
+    mkdir /mnt/vendor/nvcfg 0771 system system
+    mount ext4 /dev/block/by-name/apd /mnt/vendor/apd rw wait
+    mount ext4 /dev/block/by-name/protect1 /mnt/vendor/protect_f rw wait
+    mount ext4 /dev/block/by-name/protect2 /mnt/vendor/protect_s rw wait
+    mount ext4 /dev/block/by-name/persist /mnt/vendor/persist rw wait
+    mount ext4 /dev/block/by-name/nvdata /mnt/vendor/nvdata rw wait
+    mount ext4 /dev/block/by-name/nvcfg /mnt/vendor/nvcfg rw wait
+    mkdir /mnt/vendor/persist/t6_twrp 0755 system system
+    mkdir /mnt/vendor/protect_f/tee_twrp 0755 system system
+
+on post-fs
+    # Support A/B feature for EMMC and UFS boot region
+    wait /dev/block/mmcblk0boot0 2
+    symlink /dev/block/sda /dev/block/mmcblk0boot0
+    symlink /dev/block/sdb /dev/block/mmcblk0boot1
+    symlink /dev/block/mmcblk0boot0 /dev/block/platform/bootdevice/by-name/preloader_a
+    symlink /dev/block/mmcblk0boot1 /dev/block/platform/bootdevice/by-name/preloader_b
+
+    # Support A/B feature for combo emmc and ufs OTA update
+    symlink /dev/block/platform/bootdevice/by-name/preloader_a /dev/block/platform/bootdevice/by-name/preloader_emmc_a
+    symlink /dev/block/platform/bootdevice/by-name/preloader_b /dev/block/platform/bootdevice/by-name/preloader_emmc_b
+    symlink /dev/block/platform/bootdevice/by-name/preloader_a /dev/block/platform/bootdevice/by-name/preloader_ufs_a
+    symlink /dev/block/platform/bootdevice/by-name/preloader_b /dev/block/platform/bootdevice/by-name/preloader_ufs_b
+
+    # Support A/B feature for combo emmc and ufs OTA update
+    symlink /dev/block/platform/bootdevice/by-name/preloader_a /dev/block/by-name/preloader_emmc_a
+    symlink /dev/block/platform/bootdevice/by-name/preloader_b /dev/block/by-name/preloader_emmc_b
+    symlink /dev/block/platform/bootdevice/by-name/preloader_a /dev/block/by-name/preloader_ufs_a
+    symlink /dev/block/platform/bootdevice/by-name/preloader_b /dev/block/by-name/preloader_ufs_b
+
+    exec u:r:update_engine:s0 root root -- /system/bin/mtk_plpath_utils
+    start mtk.plpath.utils.link
+    
+service mtk.plpath.utils.link /system/bin/mtk_plpath_utils
+    class main
+    user root
+    group root system
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
